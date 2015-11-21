@@ -57,7 +57,7 @@ class Package {
         return name;
       }
 
-      if (name[0] !== '/') {
+      if (!path.isAbsolute(name)) {
         return browser[name] || name;
       }
 
@@ -65,7 +65,11 @@ class Package {
         throw new Error(`Expected ${name} to be absolute path`);
       }
 
-      const relPath = './' + path.relative(this.root, name);
+      const baseRelPath = './'+ path.relative(this.root, name);
+      const relPath = baseRelPath.indexOf('\\') !== -1
+                        ? baseRelPath.replace(/\\/g, '/')
+                        : baseRelPath;
+
       const redirect = browser[relPath] ||
               browser[relPath + '.js'] ||
               browser[relPath + '.json'];
@@ -75,6 +79,7 @@ class Package {
           redirect
         );
       }
+
 
       return name;
     });
